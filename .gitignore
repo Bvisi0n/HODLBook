@@ -1,5 +1,6 @@
 # Python
 __pycache__/
+*.py[cod]
 .venv/
 .env
 
@@ -10,5 +11,6 @@ Thumbs.db
 # VS Code
 .vscode/
 
-# Data
-/data/
+# Data (user portfolio etc.)
+/data/*
+!/data/.gitkeep
