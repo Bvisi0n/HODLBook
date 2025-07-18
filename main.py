@@ -15,14 +15,15 @@ def static_files(path):
     return send_from_directory(app.static_folder, path)
 
 def launch_browser():
+    print("[DEBUG] launch_browser function started")
     time.sleep(1)
     webbrowser.open("http://localhost:5000")
 
 if __name__ == "__main__":
+    print("[DEBUG] Entering main block")
     try:
-        print("[DEBUG] __main__ block entered")
         threading.Thread(target=launch_browser).start()
-        print("[DEBUG] Starting Flask server at http://localhost:5000")
+        print("[DEBUG] Start Flask app")
         app.run(port=5000, debug=True)
     except Exception as e:
         import traceback
