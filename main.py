@@ -23,7 +23,7 @@ if __name__ == "__main__":
         print("[DEBUG] __main__ block entered")
         threading.Thread(target=launch_browser).start()
         print("[DEBUG] Starting Flask server at http://localhost:5000")
-        app.run(port=5000)
+        app.run(port=5000, debug=True)
     except Exception as e:
         import traceback
         traceback.print_exc()
