@@ -30,3 +30,22 @@ def add_token(symbol: str, amount: float):
         "amount": amount
     })
     _save_portfolio(portfolio)
+
+def get_portfolio():
+    return _load_portfolio()
+
+def update_token(symbol: str, amount: float):
+    symbol = symbol.upper()
+    portfolio = _load_portfolio()
+
+    for entry in portfolio:
+        if entry["symbol"] == symbol:
+            entry["amount"] = amount
+            _save_portfolio(portfolio)
+            return
+
+def delete_token(symbol: str):
+    symbol = symbol.upper()
+    portfolio = _load_portfolio()
+    new_portfolio = [entry for entry in portfolio if entry["symbol"] != symbol]
+    _save_portfolio(new_portfolio)

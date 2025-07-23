@@ -1,11 +1,23 @@
-from flask import Flask, send_from_directory, request, redirect, render_template_string
+from flask import (
+    Flask,
+    send_from_directory,
+    request,
+    redirect,
+    render_template_string,
+    jsonify
+)
 import threading
 import webbrowser
 import time
 import os
 import logging
 import json
-from hodlbook.portfolio import add_token
+from hodlbook.portfolio import (
+    add_token,
+    get_portfolio,
+    update_token,
+    delete_token
+)
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -22,34 +34,40 @@ def index():
 def static_files(path):
     return send_from_directory(app.static_folder, path)
 
+@app.route("/portfolio")
+def get_portfolio_json():
+    return jsonify(get_portfolio())
+
 @app.route("/add_token", methods=["POST"])
 def add_token_route():
-    symbol = request.form.get("symbol", "").upper()
+    data = request.get_json() or request.form
+    symbol = data.get("symbol", "").upper()
     try:
-        amount = float(request.form.get("amount", ""))
-    except ValueError:
-        return "Invalid input", 400
+        amount = float(data.get("amount"))
+    except (ValueError, TypeError):
+        return "Invalid amount", 400
 
     add_token(symbol, amount)
-    return redirect("/portfolio")
+    return "", 204
 
-@app.route("/portfolio")
-def portfolio_view():
+@app.route("/update_token", methods=["POST"])
+def update_token_route():
+    data = request.get_json()
+    symbol = data.get("symbol", "").upper()
     try:
-        with open("data/portfolio.json") as f:
-            portfolio = json.load(f)
-    except:
-        portfolio = []
+        amount = float(data.get("amount"))
+    except (ValueError, TypeError):
+        return "Invalid amount", 400
 
-    return render_template_string("""
-        <h3>Current Portfolio</h3>
-        <ul>
-            {% for token in portfolio %}
-              <li>{{ token['symbol'] }} — {{ token['amount'] }}</li>
-            {% endfor %}
-        </ul>
-        <p><a href="/">Back</a></p>
-    """, portfolio=portfolio)
+    update_token(symbol, amount)
+    return "", 204
+
+@app.route("/delete_token", methods=["POST"])
+def delete_token_route():
+    data = request.get_json()
+    symbol = data.get("symbol", "").upper()
+    delete_token(symbol)
+    return "", 204
 
 def launch_browser():
     logging.debug("launch_browser function started")
