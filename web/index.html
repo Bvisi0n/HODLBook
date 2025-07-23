@@ -1,9 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>HODLBook</title>
+  <meta charset="UTF-8">
+  <title>HODLBook – Add Token</title>
 </head>
 <body>
-  <h1>🚀 HODLBook is Alive!</h1>
+  <h1>Add a Token</h1>
+
+  <form method="POST" action="/add_token">
+    <label>
+      Symbol:
+      <input name="symbol" required>
+    </label><br><br>
+
+    <label>
+      Amount:
+      <input type="number" step="any" name="amount" required>
+    </label><br><br>
+
+    <button type="submit">Add Token</button>
+  </form>
+
+  <p><a href="/portfolio">📊 View Portfolio</a></p>
 </body>
 </html>
