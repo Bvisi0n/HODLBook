@@ -142,6 +142,7 @@ async function addRow() {
 
   if (res.status === 409) {
     alert(`Token '${symbol}' already exists in your portfolio.`);
+    await fetchPortfolio();
     return;
   }
 
