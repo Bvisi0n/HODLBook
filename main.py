@@ -67,12 +67,16 @@ def update_token_route():
     update_token(symbol, amount)
     return "", 204
 
-@app.route("/delete_token", methods=["POST"])
-def delete_token_route():
-    data = request.get_json()
-    symbol = data.get("symbol", "").upper()
-    delete_token(symbol)
+@app.route("/tokens/<symbol>", methods=["DELETE"])
+def delete_token_route(symbol):
+    symbol = symbol.upper()
+    try:
+        delete_token(symbol)
+    except ValueError as e:
+        return str(e), 404
+
     return "", 204
+
 
 def launch_browser():
     logging.debug("launch_browser function started")

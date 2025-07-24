@@ -45,8 +45,17 @@ def update_token(symbol: str, amount: float):
             _save_portfolio(portfolio)
             return
 
-def delete_token(symbol: str):
-    symbol = symbol.upper()
-    portfolio = _load_portfolio()
-    new_portfolio = [entry for entry in portfolio if entry["symbol"] != symbol]
-    _save_portfolio(new_portfolio)
+def delete_token(symbol):
+    filepath = "data/portfolio.json"
+    if os.path.exists(filepath):
+        with open(filepath) as f:
+            portfolio = json.load(f)
+    else:
+        portfolio = []
+
+    new_portfolio = [t for t in portfolio if t["symbol"] != symbol]
+    if len(new_portfolio) == len(portfolio):
+        raise ValueError(f"Token '{symbol}' not found")
+
+    with open(filepath, "w") as f:
+        json.dump(new_portfolio, f, indent=2)

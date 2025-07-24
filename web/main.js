@@ -160,15 +160,17 @@ function cancelDelete() {
   document.getElementById("confirmModal").classList.remove("active");
 }
 
-function confirmDelete() {
-  fetch('/delete_token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ symbol: pendingDeleteSymbol })
-  }).then(() => {
-    cancelDelete();
-    fetchPortfolio();
+async function confirmDelete() {
+  const res = await fetch(`/tokens/${pendingDeleteSymbol}`, {
+    method: 'DELETE'
   });
+
+  if (res.status === 404) {
+    alert(`Token '${pendingDeleteSymbol}' was already deleted or not found.`);
+  }
+
+  cancelDelete();
+  fetchPortfolio();
 }
 
 fetchPortfolio();
