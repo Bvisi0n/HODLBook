@@ -117,11 +117,6 @@ async function addRow() {
 
   symbol = symbol.trim().toUpperCase();
 
-  if (portfolio.some(token => token.symbol === symbol)) {
-    alert("Token already exists in your portfolio.");
-    return;
-  }
-
   let amount = prompt("Enter amount:");
   if (amount === null) return;
   amount = amount.trim();
@@ -139,14 +134,19 @@ async function addRow() {
     return;
   }
 
-  await fetch('/add_token', {
+  const res = await fetch('/add_token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ symbol, amount: parsed })
   });
 
-  flashQueue.add(symbol);
+  if (res.status === 409) {
+    alert(`Token '${symbol}' already exists in your portfolio.`);
+    return;
+  }
+
   await fetchPortfolio();
+  flashQueue.add(symbol);
 }
 
 function showDeleteModal(symbol) {

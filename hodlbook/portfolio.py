@@ -15,21 +15,22 @@ def _save_portfolio(data):
     with open(PORTFOLIO_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
-def add_token(symbol: str, amount: float):
-    symbol = symbol.upper()
-    portfolio = _load_portfolio()
+def add_token(symbol, amount):
+    filepath = "data/portfolio.json"
+    if os.path.exists(filepath):
+        with open(filepath) as f:
+            portfolio = json.load(f)
+    else:
+        portfolio = []
 
-    for entry in portfolio:
-        if entry["symbol"] == symbol:
-            entry["amount"] = amount
-            _save_portfolio(portfolio)
-            return
+    if any(token["symbol"] == symbol for token in portfolio):
+        raise ValueError(f"Token '{symbol}' already exists")
 
-    portfolio.append({
-        "symbol": symbol,
-        "amount": amount
-    })
-    _save_portfolio(portfolio)
+    portfolio.append({"symbol": symbol, "amount": amount})
+
+    with open(filepath, "w") as f:
+        json.dump(portfolio, f, indent=2)
+
 
 def get_portfolio():
     return _load_portfolio()

@@ -42,12 +42,17 @@ def get_portfolio_json():
 def add_token_route():
     data = request.get_json() or request.form
     symbol = data.get("symbol", "").upper()
+
     try:
         amount = float(data.get("amount"))
     except (ValueError, TypeError):
         return "Invalid amount", 400
 
-    add_token(symbol, amount)
+    try:
+        add_token(symbol, amount)
+    except ValueError as e:
+        return str(e), 409
+
     return "", 204
 
 @app.route("/update_token", methods=["POST"])
