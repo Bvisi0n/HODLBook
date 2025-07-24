@@ -35,15 +35,26 @@ def add_token(symbol, amount):
 def get_portfolio():
     return _load_portfolio()
 
-def update_token(symbol: str, amount: float):
-    symbol = symbol.upper()
-    portfolio = _load_portfolio()
+def update_token(symbol, amount):
+    filepath = "data/portfolio.json"
+    if os.path.exists(filepath):
+        with open(filepath) as f:
+            portfolio = json.load(f)
+    else:
+        portfolio = []
 
-    for entry in portfolio:
-        if entry["symbol"] == symbol:
-            entry["amount"] = amount
-            _save_portfolio(portfolio)
-            return
+    found = False
+    for token in portfolio:
+        if token["symbol"] == symbol:
+            token["amount"] = amount
+            found = True
+            break
+
+    if not found:
+        raise ValueError(f"Token '{symbol}' not found")
+
+    with open(filepath, "w") as f:
+        json.dump(portfolio, f, indent=2)
 
 def delete_token(symbol):
     filepath = "data/portfolio.json"

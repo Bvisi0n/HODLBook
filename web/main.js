@@ -101,14 +101,18 @@ function flashCellClass(cell, className) {
 }
 
 async function updateToken(symbol, amount) {
-  await fetch('/update_token', {
-    method: 'POST',
+  const res = await fetch(`/tokens/${symbol}`, {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ symbol, amount })
+    body: JSON.stringify({ amount })
   });
 
+  if (res.status === 404) {
+    alert(`Token '${symbol}' not found. It may have been deleted.`);
+  }
+
   flashQueue.add(symbol.toUpperCase());
-  fetchPortfolio();
+  await fetchPortfolio();
 }
 
 async function addRow() {

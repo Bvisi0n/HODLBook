@@ -55,17 +55,23 @@ def add_token_route():
 
     return "", 204
 
-@app.route("/update_token", methods=["POST"])
-def update_token_route():
+@app.route("/tokens/<symbol>", methods=["PATCH"])
+def update_token_route(symbol):
+    symbol = symbol.upper()
     data = request.get_json()
-    symbol = data.get("symbol", "").upper()
+
     try:
         amount = float(data.get("amount"))
     except (ValueError, TypeError):
         return "Invalid amount", 400
 
-    update_token(symbol, amount)
+    try:
+        update_token(symbol, amount)
+    except ValueError as e:
+        return str(e), 404  # Not found
+
     return "", 204
+
 
 @app.route("/tokens/<symbol>", methods=["DELETE"])
 def delete_token_route(symbol):
