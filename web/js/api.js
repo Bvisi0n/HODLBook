@@ -12,7 +12,15 @@ export async function addToken(token) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(token)
   });
-  if (!res.ok) throw new Error('Failed to add token');
+
+  if (!res.ok) {
+    const error = new Error('Failed to add token');
+    error.status = res.status;
+    throw error;
+  }
+
+  if (res.status === 204) return null;
+
   return res.json();
 }
 

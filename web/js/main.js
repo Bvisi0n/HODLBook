@@ -81,12 +81,12 @@ async function addRow() {
     const res = await addToken({ symbol, amount: parsed });
     flashQueue.add(symbol);
   } catch (err) {
-    if (err.message.includes("409")) {
-      alert(`Token '${symbol}' already exists in your portfolio.`);
-    } else {
-      alert("Failed to add token.");
-    }
+  if (err.status === 409) {
+    alert(`Token '${symbol}' already exists in your portfolio.`);
+  } else {
+    alert("Failed to add token.");
   }
+}
 
   await fetchPortfolio();
 }
