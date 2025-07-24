@@ -38,7 +38,7 @@ def static_files(path):
 def get_portfolio_json():
     return jsonify(get_portfolio())
 
-@app.route("/add_token", methods=["POST"])
+@app.route("/tokens", methods=["POST"])
 def add_token_route():
     data = request.get_json() or request.form
     symbol = data.get("symbol", "").upper()

@@ -138,10 +138,10 @@ async function addRow() {
     return;
   }
 
-  const res = await fetch('/add_token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ symbol, amount: parsed })
+  const res = await fetch('/tokens', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ symbol, amount: parsed })
   });
 
   if (res.status === 409) {
