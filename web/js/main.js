@@ -1,4 +1,5 @@
 import { getPortfolio, addToken, deleteToken } from './api.js';
+import { renderTable, flashCellClass } from './dom.js';
 
 let portfolio = [];
 let pendingDeleteSymbol = null;
@@ -6,47 +7,7 @@ const flashQueue = new Set();
 
 async function fetchPortfolio() {
   portfolio = await getPortfolio();
-  renderTable();
-}
-
-function renderTable() {
-  const tbody = document.querySelector("#portfolioTable tbody");
-  tbody.innerHTML = "";
-
-  portfolio.forEach((token) => {
-    const row = buildTokenRow(token);
-    tbody.appendChild(row);
-  });
-}
-
-function buildTokenRow(token) {
-  const row = document.createElement("tr");
-  row.appendChild(buildSymbolCell(token));
-  row.appendChild(buildAmountCell(token));
-  row.appendChild(buildDeleteCell(token));
-  return row;
-}
-
-function buildSymbolCell(token) {
-  const cell = document.createElement("td");
-  cell.textContent = token.symbol;
-  cell.contentEditable = false;
-  return cell;
-}
-
-function buildAmountCell(token) {
-  const cell = document.createElement("td");
-  cell.textContent = token.amount;
-  cell.contentEditable = true;
-  cell.dataset.original = token.amount;
-
-  if (flashQueue.has(token.symbol)) {
-    flashCellClass(cell, "success");
-    flashQueue.delete(token.symbol);
-  }
-
-  cell.onblur = () => handleAmountEdit(cell, token);
-  return cell;
+  renderTable(portfolio, flashQueue, handleAmountEdit, showDeleteModal);
 }
 
 function handleAmountEdit(cell, token) {
@@ -76,29 +37,6 @@ function parseAndValidateAmount(raw) {
   if (parsed < 0) return { valid: false, reason: "negative" };
 
   return { valid: true, value: parsed };
-}
-
-function buildDeleteCell(token) {
-  const cell = document.createElement("td");
-  const button = document.createElement("button");
-  button.textContent = "Delete";
-  button.className = "btn btn-danger";
-  button.onclick = () => showDeleteModal(token.symbol);
-  cell.appendChild(button);
-  return cell;
-}
-
-function flashCellClass(cell, className) {
-  console.log(`⚡ flashCellClass: Applying '${className}' to cell with value '${cell.textContent}'`);
-
-  cell.classList.remove(className);
-  void cell.offsetWidth; // force reflow
-  cell.classList.add(className);
-
-  setTimeout(() => {
-    cell.classList.remove(className);
-    console.log(`⚡ flashCellClass: Removed '${className}' from cell`);
-  }, 1000);
 }
 
 async function updateToken(symbol, amount) {
