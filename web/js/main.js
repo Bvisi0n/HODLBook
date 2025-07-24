@@ -1,10 +1,11 @@
+import { getPortfolio, addToken, deleteToken } from './api.js';
+
 let portfolio = [];
 let pendingDeleteSymbol = null;
 const flashQueue = new Set();
 
 async function fetchPortfolio() {
-  const res = await fetch('/portfolio');
-  portfolio = await res.json();
+  portfolio = await getPortfolio();
   renderTable();
 }
 
@@ -138,20 +139,18 @@ async function addRow() {
     return;
   }
 
-  const res = await fetch('/tokens', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ symbol, amount: parsed })
-  });
-
-  if (res.status === 409) {
-    alert(`Token '${symbol}' already exists in your portfolio.`);
-    await fetchPortfolio();
-    return;
+  try {
+    const res = await addToken({ symbol, amount: parsed });
+    flashQueue.add(symbol);
+  } catch (err) {
+    if (err.message.includes("409")) {
+      alert(`Token '${symbol}' already exists in your portfolio.`);
+    } else {
+      alert("Failed to add token.");
+    }
   }
 
   await fetchPortfolio();
-  flashQueue.add(symbol);
 }
 
 function showDeleteModal(symbol) {
@@ -166,16 +165,19 @@ function cancelDelete() {
 }
 
 async function confirmDelete() {
-  const res = await fetch(`/tokens/${pendingDeleteSymbol}`, {
-    method: 'DELETE'
-  });
-
-  if (res.status === 404) {
+  try {
+    await deleteToken(pendingDeleteSymbol);
+  } catch (err) {
     alert(`Token '${pendingDeleteSymbol}' was already deleted or not found.`);
   }
 
   cancelDelete();
   fetchPortfolio();
 }
+
+// Expose to window if needed by HTML buttons
+window.addRow = addRow;
+window.cancelDelete = cancelDelete;
+window.confirmDelete = confirmDelete;
 
 fetchPortfolio();

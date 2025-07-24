@@ -34,12 +34,18 @@ def index():
 def static_files(path):
     return send_from_directory(app.static_folder, path)
 
-@app.route("/portfolio")
-def get_portfolio_json():
+@app.route("/api/portfolio", methods=["GET", "POST"])
+def portfolio_route():
+    if request.method == "GET":
+        return handle_get_portfolio()
+    if request.method == "POST":
+        return handle_add_token()
+    return "Method Not Allowed", 405
+
+def handle_get_portfolio():
     return jsonify(get_portfolio())
 
-@app.route("/tokens", methods=["POST"])
-def add_token_route():
+def handle_add_token():
     data = request.get_json() or request.form
     symbol = data.get("symbol", "").upper()
 
@@ -55,7 +61,7 @@ def add_token_route():
 
     return "", 204
 
-@app.route("/tokens/<symbol>", methods=["PATCH"])
+@app.route("/api/portfolio/<symbol>", methods=["PATCH"])
 def update_token_route(symbol):
     symbol = symbol.upper()
     data = request.get_json()
@@ -72,8 +78,7 @@ def update_token_route(symbol):
 
     return "", 204
 
-
-@app.route("/tokens/<symbol>", methods=["DELETE"])
+@app.route("/api/portfolio/<symbol>", methods=["DELETE"])
 def delete_token_route(symbol):
     symbol = symbol.upper()
     try:
@@ -82,7 +87,6 @@ def delete_token_route(symbol):
         return str(e), 404
 
     return "", 204
-
 
 def launch_browser():
     logging.debug("launch_browser function started")
