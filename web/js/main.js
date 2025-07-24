@@ -1,5 +1,6 @@
-import { getPortfolio, addToken, deleteToken } from './api.js';
+import { getPortfolio } from './api.js';
 import { renderTable, flashCellClass } from './dom.js';
+import { registerTableEvents } from './events.js';
 
 let portfolio = [];
 let pendingDeleteSymbol = null;
@@ -54,68 +55,20 @@ async function updateToken(symbol, amount) {
   await fetchPortfolio();
 }
 
-async function addRow() {
-  let symbol = prompt("Enter token symbol (e.g. BTC):");
-  if (!symbol) return;
-
-  symbol = symbol.trim().toUpperCase();
-
-  let amount = prompt("Enter amount:");
-  if (amount === null) return;
-  amount = amount.trim();
-
-  if (!amount) amount = "0";
-
-  if (/\n/.test(amount) || isNaN(amount)) {
-    alert("Invalid amount. Must be a number with no newlines or letters.");
-    return;
-  }
-
-  const parsed = parseFloat(amount);
-  if (parsed < 0) {
-    alert("Amount cannot be negative.");
-    return;
-  }
-
-  try {
-    const res = await addToken({ symbol, amount: parsed });
-    flashQueue.add(symbol);
-  } catch (err) {
-  if (err.status === 409) {
-    alert(`Token '${symbol}' already exists in your portfolio.`);
-  } else {
-    alert("Failed to add token.");
-  }
-}
-
-  await fetchPortfolio();
-}
-
 function showDeleteModal(symbol) {
   pendingDeleteSymbol = symbol;
+  window.__pendingDeleteSymbol = symbol; // used by confirmDelete
   document.getElementById("modalTokenName").textContent = symbol;
   document.getElementById("confirmModal").classList.add("active");
 }
 
-function cancelDelete() {
-  pendingDeleteSymbol = null;
-  document.getElementById("confirmModal").classList.remove("active");
-}
+// Register event handlers
+registerTableEvents({
+  flashQueue,
+  showDeleteModal,
+  fetchPortfolio,
+  setPendingDeleteSymbol: (val) => pendingDeleteSymbol = val
+});
 
-async function confirmDelete() {
-  try {
-    await deleteToken(pendingDeleteSymbol);
-  } catch (err) {
-    alert(`Token '${pendingDeleteSymbol}' was already deleted or not found.`);
-  }
-
-  cancelDelete();
-  fetchPortfolio();
-}
-
-// Expose to window if needed by HTML buttons
-window.addRow = addRow;
-window.cancelDelete = cancelDelete;
-window.confirmDelete = confirmDelete;
-
+// Initial fetch
 fetchPortfolio();
